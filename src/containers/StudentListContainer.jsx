@@ -1,7 +1,9 @@
 import React, { Component } from "react";
-import StudentDetails from "../components/StudentDetails";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
+import StudentDetailsModal from "../components/StudentDetails";
 import StudentFormModal from "../components/StudentFormModal";
 import StudentTable from "../components/StudentTable";
+import ToastMessage from "../components/ToastMessage";
 import {
   createStudent,
   deleteStudent,
@@ -10,7 +12,7 @@ import {
   getStudentById,
   updateStudent,
 } from "../services/studentService";
-import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
+import { generateNIM } from "../utils/generateNIM";
 
 class StudentListContainer extends Component {
   state = {
@@ -21,9 +23,12 @@ class StudentListContainer extends Component {
     loading: false,
     errors: [],
     isStudentFormModalOpen: false,
-    isModalDetailsOpen: false,
+    isStudentDetailsModalOpen: false,
     isDeleteConfirmationModalOpen: false,
     studentIdToDelete: null,
+    showAlert: false,
+    alertMessage: "",
+    alertType: "",
   };
 
   componentDidMount() {
@@ -36,13 +41,23 @@ class StudentListContainer extends Component {
       const response = await createStudent(student);
       this.setState((prevState) => ({
         students: [...prevState.students, response.data], // Update local state
+        showAlert: true,
+        alertMessage: "Student added successfully",
+        alertType: "success",
       }));
       this.clearForm();
       this.toggleStudentFormModal();
       this.fetchStudents();
     } catch (error) {
       this.handleApiError(error);
+      this.setState({
+        showAlert: true,
+        alertMessage: "Failed to add student",
+        alertType: "error",
+      });
     }
+
+    this.closeToast();
   };
 
   fetchStudents = async () => {
@@ -56,7 +71,7 @@ class StudentListContainer extends Component {
   };
 
   handleGetStudentById = async (studentId) => {
-    this.toggleModalDetails();
+    this.toggleStudentDetailsModal();
     try {
       const response = await getStudentById(studentId);
       this.setState({ student: response.data });
@@ -85,14 +100,23 @@ class StudentListContainer extends Component {
         students: prevState.students.map((student) =>
           student.id === studentId ? updatedStudent : student
         ), // Update local state
+        showAlert: true,
+        alertMessage: "Student updated successfully",
+        alertType: "success",
       }));
 
       this.fetchStudents();
     } catch (error) {
       this.handleApiError(error);
+      this.setState({
+        showAlert: true,
+        alertMessage: "Failed to update student",
+        alertType: "error",
+      });
     }
 
     this.toggleStudentFormModal();
+    this.closeToast();
   };
 
   handleDeleteStudent = async () => {
@@ -103,15 +127,24 @@ class StudentListContainer extends Component {
         students: prevState.students.filter(
           (student) => student.id !== studentIdToDelete
         ), // Update local state
+        showAlert: true,
+        alertMessage: "Student deleted successfully",
+        alertType: "success",
       }));
       this.fetchStudents();
     } catch (error) {
       this.handleApiError(error);
+      this.setState({
+        showAlert: true,
+        alertMessage: "Failed to delete student",
+        alertType: "error",
+      });
     }
 
     this.setState({
       isDeleteConfirmationModalOpen: false,
     });
+    this.closeToast();
   };
 
   handleInputChange = (event) => {
@@ -129,10 +162,18 @@ class StudentListContainer extends Component {
     this.setState({ query: value });
   };
 
+  handleSearchReset = () => {
+    this.setState({ query: "" });
+    this.fetchStudents();
+  };
+
   toggleStudentFormModal = () => {
+    const newNIM = generateNIM();
+
     this.setState((prevState) => ({
       isStudentFormModalOpen: !prevState.isStudentFormModalOpen,
       isEditing: false,
+      student: prevState.isStudentFormModalOpen ? {} : { nim: newNIM },
     }));
     this.clearForm();
   };
@@ -146,9 +187,9 @@ class StudentListContainer extends Component {
     });
   };
 
-  toggleModalDetails = () => {
+  toggleStudentDetailsModal = () => {
     this.setState((prevState) => ({
-      isModalDetailsOpen: !prevState.isModalDetailsOpen,
+      isStudentDetailsModalOpen: !prevState.isStudentDetailsModalOpen,
     }));
   };
 
@@ -161,10 +202,16 @@ class StudentListContainer extends Component {
 
   clearForm = () => {
     this.setState({
-      student: {},
+      student: { nim: generateNIM() },
       errors: [],
     });
   };
+
+  closeToast() {
+    setTimeout(() => {
+      this.setState({ showAlert: false });
+    }, 3000);
+  }
 
   handleApiError = (error) => {
     if (error.errors && error.errors.length > 0) {
@@ -190,9 +237,16 @@ class StudentListContainer extends Component {
       isEditing,
       isStudentFormModalOpen,
       isDeleteConfirmationModalOpen,
+      query,
     } = this.state;
     return (
       <div>
+        <ToastMessage
+          message={this.state.showAlert ? this.state.alertMessage : ""}
+          type={this.state.alertType}
+          onClose={() => this.setState({ showAlert: false })}
+        />
+
         {isStudentFormModalOpen && (
           <StudentFormModal
             student={student}
@@ -206,10 +260,10 @@ class StudentListContainer extends Component {
           />
         )}
 
-        {this.state.isModalDetailsOpen && (
-          <StudentDetails
+        {this.state.isStudentDetailsModalOpen && (
+          <StudentDetailsModal
             student={student}
-            toggleModalDetails={this.toggleModalDetails}
+            toggleStudentDetailsModal={this.toggleStudentDetailsModal}
           />
         )}
 
@@ -227,8 +281,10 @@ class StudentListContainer extends Component {
           onGetStudentDetails={this.handleGetStudentById}
           onInputChange={this.handleSearchInputChange}
           onSearch={this.handleFindStudentsByName}
+          onReset={this.handleSearchReset}
           onAddStudent={this.toggleStudentFormModal}
           isloading={loading}
+          query={query}
         />
       </div>
     );

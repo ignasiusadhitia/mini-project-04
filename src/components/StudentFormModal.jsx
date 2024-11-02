@@ -1,6 +1,8 @@
 import React from "react";
 import { getFieldErrorMessage } from "../utils/getFieldErrorMessage";
 import Modal from "./Modal";
+import { getAgeLimit } from "../utils/getAgeLimit";
+import { classOptions } from "../data/classOptions";
 
 const StudentFormModal = ({
   isEditing,
@@ -48,10 +50,12 @@ const StudentFormModal = ({
             value={student.class || ""}
             onChange={onInputChange}
           >
-            <option value="">Open this select menu</option>
-            <option value="1">One</option>
-            <option value="2">Two</option>
-            <option value="3">Three</option>
+            <option value="">Choose Class</option>
+            {classOptions.map((classItem, index) => (
+              <option key={index} value={classItem}>
+                {classItem}
+              </option>
+            ))}
           </select>
           <div className="invalid-feedback">
             {getFieldErrorMessage(errors, "class") || "Class must be a string"}
@@ -89,7 +93,7 @@ const StudentFormModal = ({
             id="nim"
             name="nim"
             value={student.nim || ""}
-            onChange={onInputChange}
+            disabled
           />
           <div className="invalid-feedback">
             {getFieldErrorMessage(errors, "nim")}
@@ -127,6 +131,7 @@ const StudentFormModal = ({
             id="birthDate"
             name="birthDate"
             value={student.birthDate || ""}
+            max={getAgeLimit()}
             onChange={onInputChange}
           />
           <div className="invalid-feedback">
@@ -138,7 +143,7 @@ const StudentFormModal = ({
           <label htmlFor="address" className="form-label">
             Address
           </label>
-          <input
+          <textarea
             type="text"
             className={`form-control ${
               getFieldErrorMessage(errors, "address") ? "is-invalid" : ""
@@ -147,7 +152,7 @@ const StudentFormModal = ({
             name="address"
             value={student.address || ""}
             onChange={onInputChange}
-          />
+          ></textarea>
           <div className="invalid-feedback">
             {getFieldErrorMessage(errors, "address")}
           </div>

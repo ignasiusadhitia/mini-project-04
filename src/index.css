@@ -52,3 +52,7 @@
   align-items: center;
   margin-bottom: 15px;
 }
+
+.rounded-cstm {
+  border-radius: 50% !important;
+}
