@@ -53,7 +53,7 @@ class StudentListContainer extends Component {
       this.setState({
         showAlert: true,
         alertMessage: "Failed to add student",
-        alertType: "error",
+        alertType: "danger",
       });
     }
 
@@ -111,7 +111,7 @@ class StudentListContainer extends Component {
       this.setState({
         showAlert: true,
         alertMessage: "Failed to update student",
-        alertType: "error",
+        alertType: "danger",
       });
     }
 
@@ -137,7 +137,7 @@ class StudentListContainer extends Component {
       this.setState({
         showAlert: true,
         alertMessage: "Failed to delete student",
-        alertType: "error",
+        alertType: "danger",
       });
     }
 
