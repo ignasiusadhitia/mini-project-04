@@ -41,10 +41,8 @@ class StudentListContainer extends Component {
       const response = await createStudent(student);
       this.setState((prevState) => ({
         students: [...prevState.students, response.data], // Update local state
-        showAlert: true,
-        alertMessage: response.message,
-        alertType: "success",
       }));
+      this.onSuccess(response.message);
       this.clearForm();
       this.toggleStudentFormModal();
       this.fetchStudents();
@@ -95,11 +93,8 @@ class StudentListContainer extends Component {
         students: prevState.students.map((student) =>
           student.id === studentId ? updatedStudent : student
         ), // Update local state
-        showAlert: true,
-        alertMessage: updatedStudent.message,
-        alertType: "success",
       }));
-
+      this.onSuccess(updatedStudent.message);
       this.fetchStudents();
     } catch (error) {
       this.handleApiError(error);
@@ -117,10 +112,8 @@ class StudentListContainer extends Component {
         students: prevState.students.filter(
           (student) => student.id !== studentIdToDelete
         ), // Update local state
-        showAlert: true,
-        alertMessage: response.message,
-        alertType: "success",
       }));
+      this.onSuccess(response.message);
       this.fetchStudents();
     } catch (error) {
       this.handleApiError(error);
@@ -198,6 +191,22 @@ class StudentListContainer extends Component {
     }, 3000);
   }
 
+  onSuccess = (message) => {
+    this.setState({
+      showAlert: true,
+      alertMessage: message,
+      alertType: "success",
+    });
+  };
+
+  onError = (message) => {
+    this.setState({
+      showAlert: true,
+      alertMessage: message,
+      alertType: "danger",
+    });
+  };
+
   handleApiError = (error) => {
     if (error.errors && error.errors.length > 0) {
       // Handle API errors with specific fields
@@ -210,10 +219,8 @@ class StudentListContainer extends Component {
       // Handle general API errors
       this.setState({
         errors: [{ field: "API", message: error.message }],
-        showAlert: true,
-        alertMessage: error.message,
-        alertType: "danger",
       });
+      this.onError(error.message);
     }
 
     this.closeToast();

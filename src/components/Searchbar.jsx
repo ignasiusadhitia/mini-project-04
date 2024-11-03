@@ -8,7 +8,7 @@ const Searchbar = ({
   query,
 }) => {
   return (
-    <div className="d-flex flex-end w-100 justify-content-between mb-5">
+    <div className="d-flex flex-end w-100 justify-content-between mb-5 mt-3">
       <button onClick={onAddStudent} className="btn btn-primary btn-sm">
         Add Student
       </button>
