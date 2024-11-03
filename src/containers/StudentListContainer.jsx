@@ -42,7 +42,7 @@ class StudentListContainer extends Component {
       this.setState((prevState) => ({
         students: [...prevState.students, response.data], // Update local state
         showAlert: true,
-        alertMessage: "Student added successfully",
+        alertMessage: response.message,
         alertType: "success",
       }));
       this.clearForm();
@@ -50,11 +50,6 @@ class StudentListContainer extends Component {
       this.fetchStudents();
     } catch (error) {
       this.handleApiError(error);
-      this.setState({
-        showAlert: true,
-        alertMessage: "Failed to add student",
-        alertType: "danger",
-      });
     }
 
     this.closeToast();
@@ -101,18 +96,13 @@ class StudentListContainer extends Component {
           student.id === studentId ? updatedStudent : student
         ), // Update local state
         showAlert: true,
-        alertMessage: "Student updated successfully",
+        alertMessage: updateStudent.message,
         alertType: "success",
       }));
 
       this.fetchStudents();
     } catch (error) {
       this.handleApiError(error);
-      this.setState({
-        showAlert: true,
-        alertMessage: "Failed to update student",
-        alertType: "danger",
-      });
     }
 
     this.toggleStudentFormModal();
@@ -122,23 +112,18 @@ class StudentListContainer extends Component {
   handleDeleteStudent = async () => {
     const { studentIdToDelete } = this.state;
     try {
-      await deleteStudent(studentIdToDelete);
+      const response = await deleteStudent(studentIdToDelete);
       this.setState((prevState) => ({
         students: prevState.students.filter(
           (student) => student.id !== studentIdToDelete
         ), // Update local state
         showAlert: true,
-        alertMessage: "Student deleted successfully",
+        alertMessage: response.message,
         alertType: "success",
       }));
       this.fetchStudents();
     } catch (error) {
       this.handleApiError(error);
-      this.setState({
-        showAlert: true,
-        alertMessage: "Failed to delete student",
-        alertType: "danger",
-      });
     }
 
     this.setState({
@@ -224,9 +209,14 @@ class StudentListContainer extends Component {
     } else {
       // Handle general API errors
       this.setState({
-        errors: [{ field: "API", messsage: error.message }],
+        errors: [{ field: "API", message: error.message }],
+        showAlert: true,
+        alertMessage: error.message,
+        alertType: "danger",
       });
     }
+
+    this.closeToast();
   };
 
   render() {
