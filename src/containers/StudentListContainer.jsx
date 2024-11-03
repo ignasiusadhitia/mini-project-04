@@ -96,7 +96,7 @@ class StudentListContainer extends Component {
           student.id === studentId ? updatedStudent : student
         ), // Update local state
         showAlert: true,
-        alertMessage: updateStudent.message,
+        alertMessage: updatedStudent.message,
         alertType: "success",
       }));
 
